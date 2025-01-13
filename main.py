@@ -1,55 +1,56 @@
-import numpy as np
+import os
 import time
-from numpy.fft import fft2, ifft2, fftshift
-import matplotlib.pyplot as plt
-plt.ion()
+import numpy as np
 
-def fft_convolve2d(x,y):
-    """
-    2D convolution, using FFT
-    """
-    fr = fft2(x)
-    fr2 = fft2(np.flipud(np.fliplr(y)))
-    m,n = fr.shape
-    cc = np.real(ifft2(fr*fr2))
-    cc = np.roll(cc, - int(m / 2) + 1, axis=0)
-    cc = np.roll(cc, - int(n / 2) + 1, axis=1)
-    return cc
+# Function to print the grid
+def print_grid(grid):
+    os.system('cls' if os.name == 'nt' else 'clear')
+    for row in grid:
+        print(''.join('#' if cell else ' ' for cell in row))
+    print()
 
-def conway(state, k=None):
-    """
-    Conway's game of life state transition
-    """
+# Function to compute the next state of the grid
+def next_generation(grid):
+    rows, cols = len(grid), len(grid[0])
+    new_grid = [[0] * cols for _ in range(rows)]
 
-    # set up kernel if not given
-    if k == None:
-        m, n = state.shape
-        k = np.zeros((m, n))
-        k[m/2-1 : m/2+2, n/2-1 : n/2+2] = np.array([[1,1,1],[1,0,1],[1,1,1]])
+    for r in range(rows):
+        for c in range(cols):
+            # Count live neighbors
+            live_neighbors = 0
+            for dr in [-1, 0, 1]:
+                for dc in [-1, 0, 1]:
+                    if dr == 0 and dc == 0:
+                        continue
+                    nr, nc = r + dr, c + dc
+                    if 0 <= nr < rows and 0 <= nc < cols:
+                        live_neighbors += grid[nr][nc]
 
-    # computes sums around each pixel
-    b = fft_convolve2d(state,k).round()
-    c = np.zeros(b.shape)
+            # Apply Conway's rules
+            if grid[r][c] == 1:  # Live cell
+                new_grid[r][c] = 1 if live_neighbors in [2, 3] else 0
+            else:  # Dead cell
+                new_grid[r][c] = 1 if live_neighbors == 3 else 0
 
-    c[np.where((b == 2) & (state == 1))] = 1
-    c[np.where((b == 3) & (state == 1))] = 1
+    return new_grid
 
-    c[np.where((b == 3) & (state == 0))] = 1
+# Main function to run the Game of Life
+def game_of_life():
+    # Initialize the grid (customize as needed)
+    rows, cols = 20, 20
+    grid = np.zeros((rows, cols), dtype=int)
 
-    # return new state
-    return c
+    # Add some initial patterns (e.g., glider)
+    grid[1, 2] = grid[2, 3] = grid[3, 1] = grid[3, 2] = grid[3, 3] = 1
+
+    # Run the game loop
+    generation = 0
+    while True:
+        print(f"Generation: {generation}")
+        print_grid(grid)
+        grid = next_generation(grid)
+        generation += 1
+        time.sleep(0.5)
 
 if __name__ == "__main__":
-    # set up board
-    m,n = 100,100
-    A = np.random.random(m*n).reshape((m, n)).round()
-
-    # plot each frame
-    plt.figure()
-    img_plot = plt.imshow(A, interpolation="nearest", cmap = plt.cm.gray)
-    plt.show(block=False)
-    while True:
-        A = conway(A)
-        img_plot.set_data(A)
-        plt.draw()
-        time.sleep(0.01)
+    game_of_life()
