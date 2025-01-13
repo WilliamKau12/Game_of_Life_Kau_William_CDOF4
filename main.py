@@ -11,8 +11,8 @@ def print_grid(grid):
 
 # Function to compute the next state of the grid
 def next_generation(grid):
-    rows, cols = len(grid), len(grid[0])
-    new_grid = [[0] * cols for _ in range(rows)]
+    rows, cols = grid.shape
+    new_grid = np.zeros((rows, cols), dtype=int)  # Use NumPy array
 
     for r in range(rows):
         for c in range(cols):
@@ -24,13 +24,13 @@ def next_generation(grid):
                         continue
                     nr, nc = r + dr, c + dc
                     if 0 <= nr < rows and 0 <= nc < cols:
-                        live_neighbors += grid[nr][nc]
+                        live_neighbors += grid[nr, nc]  # NumPy indexing
 
             # Apply Conway's rules
-            if grid[r][c] == 1:  # Live cell
-                new_grid[r][c] = 1 if live_neighbors in [2, 3] else 0
+            if grid[r, c] == 1:  # Live cell
+                new_grid[r, c] = 1 if live_neighbors in [2, 3] else 0
             else:  # Dead cell
-                new_grid[r][c] = 1 if live_neighbors == 3 else 0
+                new_grid[r, c] = 1 if live_neighbors == 3 else 0
 
     return new_grid
 
