@@ -36,8 +36,14 @@ def next_generation(grid):
 
 # Main function to run the Game of Life
 def game_of_life():
-    # Initialize the grid (customize as needed)
-    rows, cols = 20, 20
+    # Allow the user to choose grid dimensions
+    try:
+        rows = int(input("Enter the number of rows for the grid: "))
+        cols = int(input("Enter the number of columns for the grid: "))
+    except ValueError:
+        print("Invalid input. Using default grid size of 20x20.")
+        rows, cols = 20, 20
+
     grid = np.zeros((rows, cols), dtype=int)
 
     # Add some initial patterns (e.g., glider)
